@@ -136,44 +136,44 @@
 </head>
 <body>
 
-<h1>⚽ Panini FIFA World Cup 2026</h1>
-<div id="summary">Loading...</div>
+<h1>⚽ Panini Mundial 2026</h1>
+<div id="summary">Cargando...</div>
 <div id="total-bar-wrap"><div id="total-bar" style="width:0%"></div></div>
 
 <div class="faq-wrap">
-  <button class="faq-toggle" onclick="this.nextElementSibling.classList.toggle('open')">ⓘ How to use this tracker ▾</button>
+  <button class="faq-toggle" onclick="this.nextElementSibling.classList.toggle('open')">ⓘ Cómo usar este tracker ▾</button>
   <div class="faq-body">
-    <h3>What is this?</h3>
-    <p>A tracker for the official <strong>Panini FIFA World Cup 2026</strong> sticker album. All 48 teams (stickers 1–20 each) plus the 20 introduction FWC foil stickers and 12 Coca-Cola bonus stickers — 992 stickers total. Tick off what you own.</p>
-    <h3>How do I tick a sticker?</h3>
-    <p>Click or tap any sticker box to toggle it on <span class="key">✓ owned</span> or off <span class="key">□ needed</span>. Changes save instantly.</p>
-    <h3>What are the shimmering silver stickers?</h3>
-    <p>Those are <strong>foil stickers</strong>. Every team badge (sticker 1) and all 20 FWC introduction stickers are foil. The shimmer continues when ticked — it just switches to silver.</p>
-    <h3>What are the red stickers?</h3>
-    <p>The <strong>Coca-Cola bonus stickers</strong> — found under Coca-Cola bottle labels. Twelve placeholder slots are included; tick them as you find them.</p>
-    <h3>Will my ticks be saved if I close the browser?</h3>
-    <p>Yes — stored in browser local storage on <strong>this device and browser</strong>. Survives closing and reopening as long as you don't clear browser data.</p>
-    <h3>How do I move my progress to another device?</h3>
-    <p>Click <span class="key">↓ Export Progress</span>. Downloads a new copy of the file with all your ticks baked in. Send it anywhere and your collection travels with it.</p>
-    <h3>How do I filter the teams?</h3>
-    <p><span class="key">Incomplete Only</span> shows teams you've started but not finished. <span class="key">Not Started</span> shows zero-sticker teams. The introduction and Coca-Cola sections always stay pinned at the top.</p>
-    <h3>How do I reset everything?</h3>
-    <p>Click the red <span class="key">Reset All</span> button and confirm. Clears ticks in this browser only — exported copies are unaffected.</p>
-    <h3>Does this need internet / an account?</h3>
-    <p>No. Fully offline. Open in any modern browser — Chrome, Firefox, Safari, Edge. No install, no sign-in.</p>
-    <h3>The file looks broken / nothing loads</h3>
-    <p>Double-click the file to open it directly in a browser. Don't preview inside a zip. If downloaded from Reddit, save it first then open it.</p>
+    <h3>¿Qué es esto?</h3>
+    <p>Un tracker para el álbum oficial de cromos <strong>Panini FIFA World Cup 2026</strong>. Los 48 equipos (cromos 1–20 cada uno) más 20 cromos foil de introducción y 12 cromos extra de Coca-Cola — 992 cromos en total. Marca los que tienes.</p>
+    <h3>¿Cómo marco un cromo?</h3>
+    <p>Toca cualquier cromo para marcarlo como <span class="key">✓ tengo</span> o desmarcarlo <span class="key">□ me falta</span>. Los cambios se guardan al instante.</p>
+    <h3>¿Qué son los cromos plateados brillantes?</h3>
+    <p>Son los <strong>cromos foil</strong>. El escudo de cada equipo (cromo 1) y los 20 cromos de introducción son foil. El brillo se mantiene al marcarlos — solo cambia a plateado.</p>
+    <h3>¿Qué son los cromos rojos?</h3>
+    <p>Son los <strong>cromos extra de Coca-Cola</strong> — se encuentran bajo las etiquetas de botellas de Coca-Cola. Se incluyen 12 huecos; márcalos cuando los encuentres.</p>
+    <h3>¿Se guardan mis cromos si cierro el navegador?</h3>
+    <p>Sí — se guardan en el almacenamiento local del <strong>este dispositivo y navegador</strong>. Sobrevive al cierre y reapertura mientras no borres los datos del navegador.</p>
+    <h3>¿Cómo paso mi progreso a otro dispositivo?</h3>
+    <p>Dale a <span class="key">↓ Export</span>. Descarga una copia del archivo con todos tus cromos marcados. Envíalo a donde quieras y tu colección viaja contigo.</p>
+    <h3>¿Cómo filtrar los equipos?</h3>
+    <p><span class="key">Incompletos</span> muestra los equipos que has empezado pero no terminado. <span class="key">Sin empezar</span> muestra equipos con 0 cromos. Las secciones de introducción y Coca-Cola siempre se quedan arriba.</p>
+    <h3>¿Cómo reinicio todo?</h3>
+    <p>Dale al botón rojo <span class="key">Reiniciar</span> y confirma. Borra los cromos solo en este navegador — las copias exportadas no se ven afectadas.</p>
+    <h3>¿Necesita internet o cuenta?</h3>
+    <p>No. Totalmente offline. Abre en cualquier navegador moderno — Chrome, Firefox, Safari, Edge. Sin instalar, sin registrarse.</p>
+    <h3>El archivo no carga / se ve roto</h3>
+    <p>Haz doble clic en el archivo para abrirlo directamente en el navegador. No lo previsualices dentro de un zip. Si lo descargaste de internet, guárdalo primero y luego ábrelo.</p>
   </div>
 </div>
 
 <div class="filter-bar">
-  <button class="active" onclick="filterTeams('all', this)">All Teams</button>
-  <button onclick="filterTeams('incomplete', this)">Incomplete Only</button>
-  <button onclick="filterTeams('complete', this)">Complete Sets</button>
-  <button onclick="filterTeams('none', this)">Not Started</button>
-  <button onclick="exportProgress()" style="background:#1a5e20;color:#fff;border-color:#1a5e20">↓ Export</button>
-  <button onclick="shareList()" style="background:#0071e3;color:#fff;border-color:#0071e3">📤 Share</button>
-  <button onclick="resetAll()" style="background:#8b0000;color:#fff;border-color:#8b0000">Reset All</button>
+  <button class="active" onclick="filterTeams('all', this)">Todos</button>
+  <button onclick="filterTeams('incomplete', this)">Incompletos</button>
+  <button onclick="filterTeams('complete', this)">Completos</button>
+  <button onclick="filterTeams('none', this)">Sin empezar</button>
+  <button onclick="exportProgress()" style="background:#1a5e20;color:#fff;border-color:#1a5e20">↓ Exportar</button>
+  <button onclick="shareList()" style="background:#0071e3;color:#fff;border-color:#0071e3">📤 Compartir</button>
+  <button onclick="resetAll()" style="background:#8b0000;color:#fff;border-color:#8b0000">Reiniciar</button>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -385,7 +385,7 @@ function filterTeams(mode, btn) {
 }
 
 function resetAll() {
-  if (!confirm('Reset ALL checkboxes? This cannot be undone.')) return;
+  if (!confirm('¿Reiniciar TODOS los cromos? Esto no se puede deshacer.')) return;
   _resetting = true;
   localStorage.removeItem(STORAGE_KEY);
   buildCards();
@@ -437,7 +437,7 @@ function shareList() {
     missingCount += missing.length;
     text += '❌ ' + name + ': ' + missing.join(',') + '\n';
   });
-  text += '\n📊 Total: ' + missingCount + ' cromos me faltan';
+  text += '\n📊 Total: ' + missingCount + ' cromos ME FALTAN';
   text += '\n✅ ' + (960 - missingCount) + ' tengo';
 
   // Crear textarea para copiar
@@ -449,7 +449,7 @@ function shareList() {
   ta.select();
   try {
     document.execCommand('copy');
-    alert('📋 Lista copiada al portapapeles\n\nPégala en WhatsApp/Telegram y envíasela a tus amigos.');
+    alert('📋 Lista copiada al portapapeles\n\nPégala en WhatsApp o Telegram y envíasela a tus amigos.');
   } catch(e) {
     prompt('📋 Copia este texto manualmente:', text);
   }

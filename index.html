@@ -171,7 +171,8 @@
   <button onclick="filterTeams('incomplete', this)">Incomplete Only</button>
   <button onclick="filterTeams('complete', this)">Complete Sets</button>
   <button onclick="filterTeams('none', this)">Not Started</button>
-  <button onclick="exportProgress()" style="background:#1a5e20;color:#fff;border-color:#1a5e20">↓ Export Progress</button>
+  <button onclick="exportProgress()" style="background:#1a5e20;color:#fff;border-color:#1a5e20">↓ Export</button>
+  <button onclick="shareList()" style="background:#0071e3;color:#fff;border-color:#0071e3">📤 Share</button>
   <button onclick="resetAll()" style="background:#8b0000;color:#fff;border-color:#8b0000">Reset All</button>
 </div>
 
@@ -417,6 +418,42 @@ function exportProgress() {
   a.download = 'World_Cup_2026_Sticker_Tracker.html';
   a.click();
   URL.revokeObjectURL(a.href);
+}
+
+function shareList() {
+  const s = loadState();
+  let text = '🏆 *Panini Mundial 2026 - Mis cromos*\n\n';
+  let missingCount = 0;
+  TEAMS.forEach(([name]) => {
+    const k = teamKey(name);
+    const owned = s[k] ? Object.entries(s[k]).filter(([,v]) => v === true).map(([n]) => parseInt(n)).filter(n => !isNaN(n)).sort((a,b) => a-b) : [];
+    if (owned.length === 20) {
+      return; // skip completed
+    }
+    const missing = [];
+    for (let i = 1; i <= 20; i++) {
+      if (!owned.includes(i)) missing.push(i);
+    }
+    missingCount += missing.length;
+    text += '❌ ' + name + ': ' + missing.join(',') + '\n';
+  });
+  text += '\n📊 Total: ' + missingCount + ' cromos me faltan';
+  text += '\n✅ ' + (960 - missingCount) + ' tengo';
+
+  // Crear textarea para copiar
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    alert('📋 Lista copiada al portapapeles\n\nPégala en WhatsApp/Telegram y envíasela a tus amigos.');
+  } catch(e) {
+    prompt('📋 Copia este texto manualmente:', text);
+  }
+  document.body.removeChild(ta);
 }
 
 const PAGE_TEMPLATE = document.documentElement.outerHTML;

@@ -69,6 +69,7 @@
   input:checked + .sticker-box::after { content: '✓'; color: white; font-weight: bold; font-size: 13px; }
   input:not(:checked) + .sticker-box::after { content: ''; }
   label:has(input:checked) .sticker-num { color: #00c853; font-weight: bold; }
+  .dup-badge { display: inline-block; background: #b8860b; color: #0a1628; border-radius: 6px; padding: 0 5px; font-size: 0.5rem; font-weight: bold; line-height: 1.5; margin-left: 1px; vertical-align: top; }
 
   /* ── Foil stickers ── */
   @keyframes foil-sweep {
@@ -179,7 +180,7 @@
 <div class="grid" id="grid"></div>
 
 <script>
-const DATA_VERSION = 3;
+const DATA_VERSION = 4;
 
 // __INTRO_STATE_START__
 const INTRO_OWNED = [];
@@ -257,33 +258,37 @@ const TOTAL = 48 * 20 + INTRO_STICKERS.length + COKE_STICKERS.length;
 
 let _resetting = false;
 
-function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+function loadState() { try { const s = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; if (!s.__version || s.__version < 4) { /* migrate booleans to numbers */ for (const k of Object.keys(s)) { if (k === '__version') continue; for (const n of Object.keys(s[k])) { if (typeof s[k][n] === 'boolean') s[k][n] = s[k][n] ? 1 : 0; } } s.__version = 4; saveState(s); } return s; } catch { return {}; } }
 function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 function teamKey(n) { return n.replace(/\s+/g, '_'); }
 
 function updateSummary() {
   const s = loadState();
   let total = 0;
-  if (s[INTRO_KEY]) total += Object.values(s[INTRO_KEY]).filter(v => v === true).length;
-  if (s[COKE_KEY])  total += Object.values(s[COKE_KEY]).filter(v => v === true).length;
-  TEAMS.forEach(([name]) => { const k = teamKey(name); if (s[k]) total += Object.values(s[k]).filter(v => v === true).length; });
+  if (s[INTRO_KEY]) total += Object.values(s[INTRO_KEY]).filter(v => v >= 1).length;
+  if (s[COKE_KEY])  total += Object.values(s[COKE_KEY]).filter(v => v >= 1).length;
+  TEAMS.forEach(([name]) => { const k = teamKey(name); if (s[k]) total += Object.values(s[k]).filter(v => v >= 1).length; });
   const pct = Math.round(total / TOTAL * 100);
-  document.getElementById('summary').textContent = `${total} / ${TOTAL} stickers collected (${pct}%)`;
+  let dups = 0;
+  if (s[INTRO_KEY]) dups += Object.values(s[INTRO_KEY]).filter(v => v >= 2).reduce((a,v) => a+v-1, 0);
+  if (s[COKE_KEY]) dups += Object.values(s[COKE_KEY]).filter(v => v >= 2).reduce((a,v) => a+v-1, 0);
+  TEAMS.forEach(([name]) => { const k = teamKey(name); if (s[k]) dups += Object.values(s[k]).filter(v => v >= 2).reduce((a,v) => a+v-1, 0); });
+  document.getElementById('summary').textContent = `${total} / ${TOTAL} cromos (${pct}%)  |  🟡 ${dups} repetidos`;
   document.getElementById('total-bar').style.width = pct + '%';
 }
 
 function updateCount(k) {
   const s = loadState();
   if (k === INTRO_KEY) {
-    const n = s[INTRO_KEY] ? Object.values(s[INTRO_KEY]).filter(v => v === true).length : 0;
+    const n = s[INTRO_KEY] ? Object.values(s[INTRO_KEY]).filter(v => v >= 1).length : 0;
     const c = document.querySelector('[data-type="intro"]');
     if (c) { c.querySelector('.team-count').textContent = `${n}/${INTRO_STICKERS.length}`; c.querySelector('.team-progress-fill').style.width = (n/INTRO_STICKERS.length*100)+'%'; }
   } else if (k === COKE_KEY) {
-    const n = s[COKE_KEY] ? Object.values(s[COKE_KEY]).filter(v => v === true).length : 0;
+    const n = s[COKE_KEY] ? Object.values(s[COKE_KEY]).filter(v => v >= 1).length : 0;
     const c = document.querySelector('[data-type="coke"]');
     if (c) { c.querySelector('.team-count').textContent = `${n}/${COKE_STICKERS.length}`; c.querySelector('.team-progress-fill').style.width = (n/COKE_STICKERS.length*100)+'%'; }
   } else {
-    const n = s[k] ? Object.values(s[k]).filter(v => v === true).length : 0;
+    const n = s[k] ? Object.values(s[k]).filter(v => v >= 1).length : 0;
     const c = document.querySelector(`[data-team="${k}"]`);
     if (c) { c.querySelector('.team-count').textContent = `${n}/20`; c.querySelector('.team-progress-fill').style.width = (n/20*100)+'%'; c.classList.toggle('team-complete', n === 20); }
   }
@@ -293,7 +298,9 @@ function makeLabel(extraClass, dataTeam, dataNum, checked, labelText) {
   const lbl = document.createElement('label');
   lbl.className = 'sticker-label' + (extraClass ? ' ' + extraClass : '');
   lbl.innerHTML = `<input type="checkbox" ${checked} data-team="${dataTeam}" data-num="${dataNum}"><div class="sticker-box"></div><span class="sticker-num">${labelText}</span>`;
-  lbl.querySelector('input').addEventListener('change', onCheck);
+  const inp = lbl.querySelector('input');
+  inp.addEventListener('change', onCheck);
+  lbl.addEventListener('contextmenu', onRightClick);
   return lbl;
 }
 
@@ -321,7 +328,7 @@ function buildCards() {
   grid.innerHTML = '';
 
   // ── Intro card ──
-  const introOwned = Object.values(s[INTRO_KEY]).filter(v => v === true).length;
+  const introOwned = Object.values(s[INTRO_KEY]).filter(v => v >= 1).length;
   const introCard = document.createElement('div');
   introCard.className = 'team-card intro-card';
   introCard.dataset.type = 'intro';
@@ -331,7 +338,7 @@ function buildCards() {
   grid.appendChild(introCard);
 
   // ── Coca-Cola card ──
-  const cokeOwned = Object.values(s[COKE_KEY]).filter(v => v === true).length;
+  const cokeOwned = Object.values(s[COKE_KEY]).filter(v => v >= 1).length;
   const cokeCard = document.createElement('div');
   cokeCard.className = 'team-card coke-card';
   cokeCard.dataset.type = 'coke';
@@ -343,7 +350,7 @@ function buildCards() {
   // ── Team cards ──
   TEAMS.forEach(([name]) => {
     const k = teamKey(name);
-    const owned = Object.values(s[k]).filter(v => v === true).length;
+    const owned = Object.values(s[k]).filter(v => v >= 1).length;
     const card = document.createElement('div');
     card.className = 'team-card' + (owned === 20 ? ' team-complete' : '');
     card.dataset.team = k;
@@ -362,10 +369,60 @@ function onCheck(e) {
   const isStr = (k === INTRO_KEY || k === COKE_KEY);
   const n = isStr ? e.target.dataset.num : parseInt(e.target.dataset.num);
   if (!s[k]) s[k] = {};
-  s[k][n] = e.target.checked;
+  // Click: cycle 0->1->2->3... Right-click: decrement
+  let val = (s[k][n] || 0);
+  val = (val >= 1) ? val + 1 : 1;
+  s[k][n] = val;
   saveState(s);
   updateCount(k);
   updateSummary();
+  renderSticker(k, n, val);
+}
+function onRightClick(e) {
+  e.preventDefault();
+  const s = loadState();
+  const k = e.target.dataset.team;
+  const isStr = (k === INTRO_KEY || k === COKE_KEY);
+  const n = isStr ? e.target.dataset.num : parseInt(e.target.dataset.num);
+  if (!s[k]) s[k] = {};
+  let val = (s[k][n] || 0);
+  if (val <= 0) return;
+  val = (val === 1) ? 0 : val - 1;
+  s[k][n] = val;
+  saveState(s);
+  updateCount(k);
+  updateSummary();
+  renderSticker(k, n, val);
+}
+function renderSticker(k, n, val) {
+  const isStr = (k === INTRO_KEY || k === COKE_KEY);
+  const numStr = isStr ? n : n.toString();
+  const inp = document.querySelector(`input[data-team="${k}"][data-num="${numStr}"]`);
+  if (!inp) return;
+  const lbl = inp.parentElement;
+  const box = lbl.querySelector('.sticker-box');
+  const num = lbl.querySelector('.sticker-num');
+  const badge = lbl.querySelector('.dup-badge');
+  if (val >= 1) {
+    inp.checked = true;
+    lbl.classList.toggle('sticker-dup', val >= 2);
+    if (val >= 2) {
+      if (!badge) {
+        const b = document.createElement('span');
+        b.className = 'dup-badge';
+        b.textContent = '×' + val;
+        lbl.appendChild(b);
+      } else {
+        badge.textContent = '×' + val;
+      }
+    } else {
+      if (badge) badge.remove();
+    }
+  } else {
+    inp.checked = false;
+    lbl.classList.remove('sticker-dup');
+    if (badge) badge.remove();
+  }
 }
 
 function filterTeams(mode, btn) {
@@ -375,7 +432,7 @@ function filterTeams(mode, btn) {
   document.querySelectorAll('.team-card').forEach(card => {
     if (card.dataset.type === 'intro' || card.dataset.type === 'coke') { card.style.display = ''; return; }
     const k = card.dataset.team;
-    const owned = s[k] ? Object.values(s[k]).filter(v => v === true).length : 0;
+    const owned = s[k] ? Object.values(s[k]).filter(v => v >= 1).length : 0;
     let show = true;
     if (mode === 'incomplete') show = owned > 0 && owned < 20;
     else if (mode === 'complete') show = owned === 20;
@@ -424,23 +481,32 @@ function shareList() {
   const s = loadState();
   let text = '🏆 *Panini Mundial 2026 - Mis cromos*\n\n';
   let missingCount = 0;
+  let dupTotal = 0;
+  let dupLines = '';
   TEAMS.forEach(([name]) => {
     const k = teamKey(name);
-    const owned = s[k] ? Object.entries(s[k]).filter(([,v]) => v === true).map(([n]) => parseInt(n)).filter(n => !isNaN(n)).sort((a,b) => a-b) : [];
-    if (owned.length === 20) {
-      return; // skip completed
+    const owned = s[k] ? Object.entries(s[k]).filter(([,v]) => v >= 1).map(([n]) => parseInt(n)).filter(n => !isNaN(n)).sort((a,b) => a-b) : [];
+    const dups = s[k] ? Object.entries(s[k]).filter(([,v]) => v >= 2).map(([n, v]) => ({n: parseInt(n), count: v-1})).filter(x => !isNaN(x.n)) : [];
+    if (owned.length === 20 && dups.length === 0) {
+      return; // skip completed without dups
     }
     const missing = [];
     for (let i = 1; i <= 20; i++) {
       if (!owned.includes(i)) missing.push(i);
     }
-    missingCount += missing.length;
-    text += '❌ ' + name + ': ' + missing.join(',') + '\n';
+    if (missing.length > 0) {
+      missingCount += missing.length;
+      text += '❌ ' + name + ': ' + missing.join(',') + '\n';
+    }
+    dups.forEach(d => { dupTotal += d.count; dupLines += '🟡 ' + name + ' #' + d.n + ' (×' + (d.count+1) + ')\n'; });
   });
   text += '\n📊 Total: ' + missingCount + ' cromos ME FALTAN';
   text += '\n✅ ' + (960 - missingCount) + ' tengo';
+  if (dupTotal > 0) {
+    text += '\n\n🟡 *REPETIDOS para cambiar:*\n' + dupLines;
+    text += '\nTotal repetidos: ' + dupTotal;
+  }
 
-  // Crear textarea para copiar
   const ta = document.createElement('textarea');
   ta.value = text;
   ta.style.position = 'fixed';
@@ -449,9 +515,9 @@ function shareList() {
   ta.select();
   try {
     document.execCommand('copy');
-    alert('📋 Lista copiada al portapapeles\n\nPégala en WhatsApp o Telegram y envíasela a tus amigos.');
+    alert('📋 Copiado al portapapeles\n\nPégalo en WhatsApp/Telegram: faltan + repetidos.');
   } catch(e) {
-    prompt('📋 Copia este texto manualmente:', text);
+    prompt('📋 Copia manual:', text);
   }
   document.body.removeChild(ta);
 }
